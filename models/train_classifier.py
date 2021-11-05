@@ -20,6 +20,9 @@ import pickle
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
+from sklearn.metrics import precision_recall_fscore_support
+
+
 nltk.download('stopwords')
 import re
 stop_words = stopwords.words("english")
@@ -54,15 +57,18 @@ def build_model():
     ('tfidf', TfidfTransformer()),
     ('clf', MultiOutputClassifier(RandomForestClassifier()))
 ])
-    return pipeline
+    parameters = {'clf__estimator__max_depth': [10, 50, None],
+              'clf__estimator__min_samples_leaf':[2, 5, 10]}
 
+    cv = GridSearchCV(pipeline, parameters)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    y_pred = model.predict(X_test)
-    for i in range(36):
-        print(Y_test.columns[i],classification_report(Y_test.iloc[:,i], y_pred[:,i], target_names=category_names))
+    Y_pred = model.predict(X_test)
+    print(classification_report(Y_test, Y_pred, target_names=category_names))
     return
+
 
 
 def save_model(model, model_filepath):
@@ -81,6 +87,7 @@ def main():
         
         print('Building model...')
         model = build_model()
+
         
         print('Training model...')
         model.fit(X_train, Y_train)
