@@ -29,6 +29,16 @@ stop_words = stopwords.words("english")
 lemmatizer = WordNetLemmatizer()
 
 def load_data(database_filepath):
+    """
+    This method loads the data from the previously created sqlite database. Here we are using the messages table.
+    Before returning the df, this method assigns X and Y variables for the model.
+    input: 
+    database_filepath - path to sqlite db
+    return: 
+    X - data frame features
+    Y - target feature
+    category_names - list of category names
+    """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table('messages', engine)
     X = df['message']
@@ -39,6 +49,7 @@ def load_data(database_filepath):
 
 def tokenize(text):
     """
+    This method tokenizes the free text messages. These tokens would be fed as input to the algo.
     input: 
     text - message text to be tokenized
     return: 
@@ -52,6 +63,13 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    This method builds the classification model using the pipeline. Then this pipeline parameters are fine tuned using grid search.
+    input: 
+
+    return: 
+    cv - optimized classification model
+    """
     pipeline = Pipeline([
     ('vect', CountVectorizer(tokenizer = tokenize)),
     ('tfidf', TfidfTransformer()),
@@ -65,6 +83,16 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    This method evaluates the model using sklearn metrics (precision, recall, f1-score)
+    input: 
+    model - optimised model
+    X_test - features from the test split
+    Y_test - actual value of Y (to be comppared with predicted)
+    category_names - list of all category names
+    return: 
+
+    """
     Y_pred = model.predict(X_test)
     print(classification_report(Y_test, Y_pred, target_names=category_names))
     return
@@ -72,6 +100,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    This method saved the classification model to a pickle file.
+
+    """
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 

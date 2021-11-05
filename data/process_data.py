@@ -4,6 +4,14 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    This method loads the dataframes from csv files and merges them
+    input: 
+    messages_filepath - path to messages csv file
+    categories_filepath - path to categories csv file
+    return: 
+    df - merged df
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = messages.merge(categories, on='id')
@@ -11,6 +19,13 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """
+    This method cleans the data. Takes care of categorical columns and duplicate records.
+    input: 
+    df - df with data to be cleaned
+    return: 
+    df - cleaned df
+    """
     #split categories
     categories = categories = df['categories'].str.split(';', expand = True)
     row = categories[0:1]
@@ -24,10 +39,23 @@ def clean_data(df):
         categories[column] = categories[column].astype(int) 
     df.drop(['categories'], axis=1, inplace=True)
     df = pd.concat([df, categories], axis = 1)
+    #review edit - remove non binary entries
+    print("before{}".format(df.shape))
+    df = df[df['related'] != 2]
     df=df.drop_duplicates()
+    print("after removing non binary values {}".format(df.shape))
+    
     return df
 
 def save_data(df, database_filename):
+    """
+    This method saves the cleaned data in a sqlite db.
+    input: 
+    df - final cleaned df
+    database_filename - db file path
+    return: 
+
+    """
     engine = create_engine('sqlite:///{}'.format(database_filename))
     df.to_sql('messages', engine, index=False,if_exists='replace')  
 
