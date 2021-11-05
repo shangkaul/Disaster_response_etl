@@ -43,3 +43,18 @@ NOTE: Make sure you use 127.0.0.1 to serve the app and not 0.0.0.0 even if that 
 2. Data folder contains the essential data files with the ETL preparation jupyter notebook.
 3. Models folder contains ML classifier pkl file and the ML preparation jupyter notebook.
 4. README file
+
+## Executing Scripts:
+1. Run the following commands in the project's root directory to set up your database and model.
+
+    - To run ETL pipeline that cleans data and stores in database
+        `cd data`
+        `python process_data.py disaster_messages.csv disaster_categories.csv Disaster_ETL.db`
+    - To run ML pipeline that trains classifier and saves
+        `cd models`
+        `python train_classifier.py data/Disaster_ETL.db models/MLclassifier.pkl`
+
+2. Run the following command in the app's directory to run your web app.(cd app then -)
+    `python run.py`
+
+3. Go to http://0.0.0.0:3001/
